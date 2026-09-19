@@ -5,19 +5,19 @@
 import { IGameState, IAction, ActionType } from '../../core/interfaces';
 import { BaseRuleSet } from '../../engine/BaseRuleSet';
 export declare const EK_CARD_TYPES: {
-    readonly EXPLODING_KITTEN: 'exploding_kitten';
-    readonly DEFUSE: 'defuse';
-    readonly ATTACK: 'attack';
-    readonly SKIP: 'skip';
-    readonly SEE_FUTURE: 'see_future';
-    readonly SHUFFLE: 'shuffle';
-    readonly FAVOR: 'favor';
-    readonly NOPE: 'nope';
-    readonly BEARD_CAT: 'beard_cat';
-    readonly HACKER_CAT: 'hacker_cat';
-    readonly POTATO_CAT: 'potato_cat';
-    readonly RAINBOW_RALPH_CAT: 'rainbow_ralph_cat';
-    readonly CATERMELON_CAT: 'catermelon_cat';
+    readonly EXPLODING_KITTEN: "exploding_kitten";
+    readonly DEFUSE: "defuse";
+    readonly ATTACK: "attack";
+    readonly SKIP: "skip";
+    readonly SEE_FUTURE: "see_future";
+    readonly SHUFFLE: "shuffle";
+    readonly FAVOR: "favor";
+    readonly NOPE: "nope";
+    readonly BEARD_CAT: "beard_cat";
+    readonly HACKER_CAT: "hacker_cat";
+    readonly POTATO_CAT: "potato_cat";
+    readonly RAINBOW_RALPH_CAT: "rainbow_ralph_cat";
+    readonly CATERMELON_CAT: "catermelon_cat";
 };
 export declare class ExplodingKittensRuleSet extends BaseRuleSet {
     gameName: string;

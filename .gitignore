@@ -1,68 +1,55 @@
-```gitignore
+```
+# Build artifacts
+dist/
+build/
+
+# Maps
+*.map
+
 # Dependencies
 node_modules/
 
-# Build outputs
-dist/
-build/
-*.tsbuildinfo
+# Logs
+*.log
 
 # Environment
 .env
 .env.local
-.env.*
+*.env.*
 
 # Editors
 .vscode/
 .idea/
 
-# Logs
-*.log
-
-# Python (if applicable)
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Temporary files
-*.tmp
-*.swp
-*~
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Testing
-.mypy_cache/
-.pytest_cache/
-
-# Virtual environments
-.venv/
-venv/
-.env/
-
-# Gradle
-.gradle/
-build/
-
-# Go (if applicable)
-bin/
+# Compiled
+*.o
+*.obj
 *.exe
 *.dll
 *.so
-*.dylib
+*.a
 
-# Rust (if applicable)
-target/
+# Temp files
+*.tmp
+*.swp
+*.swo
 
-# Compressed files
+# System
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+coverage/
+htmlcov/
+
+# Compressed
 *.zip
 *.gz
 *.tar

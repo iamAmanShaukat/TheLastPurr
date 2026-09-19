@@ -175,8 +175,18 @@ export class GameServer {
       this.rooms.set(roomId, room);
 
       // Broadcast game started to all players
-      this.io.to(roomId).emit('game_started', {
-        gameState: this.getSanitizedState(room, player.id)
+      const playersInRoom = Array.from(room.players.values());
+      playersInRoom.forEach((p) => {
+        const currentRoom = this.rooms.get(roomId);
+        if (!currentRoom) return;
+        
+        const sanitizedState = this.getSanitizedState(currentRoom, p.id);
+        const playerSocket = this.io.sockets.sockets.get(p.socketId);
+        if (playerSocket && !p.isDisconnected) {
+          playerSocket.emit('game_started', {
+            gameState: { ...sanitizedState, myPlayerId: p.id }
+          });
+        }
       });
 
       // Start AFK timer for current player
@@ -219,7 +229,9 @@ export class GameServer {
           const sanitizedState = this.engine.getSanitizedState(currentRoom, player.id);
           const playerSocket = this.io.sockets.sockets.get(player.socketId);
           if (playerSocket && !player.isDisconnected) {
-            playerSocket.emit('state_update', { gameState: sanitizedState });
+            playerSocket.emit('state_update', { 
+              gameState: { ...sanitizedState, myPlayerId: player.id } 
+            });
           }
         });
 

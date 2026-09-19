@@ -17,9 +17,12 @@ class GameServer {
         this.reconnectTimers = new Map();
         this.io = new socket_io_1.Server({
             cors: {
-                origin: config.corsOrigins,
-                methods: ['GET', 'POST']
-            }
+                origin: ['http://localhost:5173', 'http://localhost:3000'],
+                methods: ['GET', 'POST'],
+                credentials: true
+            },
+            pingTimeout: 60000,
+            pingInterval: 25000
         });
         this.setupSocketHandlers();
     }
@@ -131,8 +134,18 @@ class GameServer {
             room = this.engine.startGame(room);
             this.rooms.set(roomId, room);
             // Broadcast game started to all players
-            this.io.to(roomId).emit('game_started', {
-                gameState: this.getSanitizedState(room, player.id)
+            const playersInRoom = Array.from(room.players.values());
+            playersInRoom.forEach((p) => {
+                const currentRoom = this.rooms.get(roomId);
+                if (!currentRoom)
+                    return;
+                const sanitizedState = this.getSanitizedState(currentRoom, p.id);
+                const playerSocket = this.io.sockets.sockets.get(p.socketId);
+                if (playerSocket && !p.isDisconnected) {
+                    playerSocket.emit('game_started', {
+                        gameState: { ...sanitizedState, myPlayerId: p.id }
+                    });
+                }
             });
             // Start AFK timer for current player
             this.startAfkTimer(room, room.gameState.currentPlayerId);
@@ -169,7 +182,9 @@ class GameServer {
                     const sanitizedState = this.engine.getSanitizedState(currentRoom, player.id);
                     const playerSocket = this.io.sockets.sockets.get(player.socketId);
                     if (playerSocket && !player.isDisconnected) {
-                        playerSocket.emit('state_update', { gameState: sanitizedState });
+                        playerSocket.emit('state_update', {
+                            gameState: { ...sanitizedState, myPlayerId: player.id }
+                        });
                     }
                 });
                 // Update AFK timer

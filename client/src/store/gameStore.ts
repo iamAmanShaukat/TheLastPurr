@@ -39,21 +39,24 @@ export const useGameStore = create<GameState>((set, get) => ({
       socket.emit('join_room', { roomId, playerName });
     });
 
-    socket.on('game_state', (state: IGameState & { myPlayerId: string }) => {
-      console.log('Received game state:', state);
+    socket.on('room_joined', (data: { roomId: string; playerId: string; players: any[] }) => {
+      console.log('Joined room:', data);
+      set({ playerId: data.playerId });
+    });
+
+    socket.on('game_started', (data: { gameState: IGameState & { myPlayerId: string } }) => {
+      console.log('Game started:', data);
       set({ 
-        gameState: {
-          status: state.status,
-          currentPlayerId: state.currentPlayerId,
-          phase: state.phase,
-          deckCount: state.deckCount,
-          discardPile: state.discardPile,
-          players: state.players,
-          actionStack: state.actionStack,
-          metadata: state.metadata,
-          winnerId: state.winnerId,
-        },
-        playerId: state.myPlayerId,
+        gameState: data.gameState,
+        playerId: data.gameState.myPlayerId,
+      });
+    });
+
+    socket.on('state_update', (data: { gameState: IGameState & { myPlayerId: string } }) => {
+      console.log('State update:', data);
+      set({ 
+        gameState: data.gameState,
+        playerId: data.gameState.myPlayerId,
       });
     });
 
@@ -79,16 +82,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   playCard: (cardId: string, targetId?: string, targetIndex?: number) => {
-    const { socket, roomId } = get();
-    if (socket && roomId) {
-      socket.emit('action', {
+    const { socket, roomId, playerId } = get();
+    if (socket && roomId && playerId) {
+      socket.emit('play_action', {
         roomId,
-        actionId: crypto.randomUUID(),
-        playerId: get().playerId!,
-        action: 'PLAY_CARD',
-        cardId,
-        targetId,
-        targetIndex,
+        action: {
+          id: crypto.randomUUID(),
+          playerId,
+          action: 'PLAY_CARD',
+          cardId,
+          targetId,
+          targetIndex,
+        },
       });
     }
   },
@@ -96,11 +101,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   drawCard: () => {
     const { socket, roomId, playerId } = get();
     if (socket && roomId && playerId) {
-      socket.emit('action', {
+      socket.emit('play_action', {
         roomId,
-        actionId: crypto.randomUUID(),
-        playerId,
-        action: 'DRAW_CARD',
+        action: {
+          id: crypto.randomUUID(),
+          playerId,
+          action: 'DRAW_CARD',
+        },
       });
     }
   },
@@ -108,11 +115,13 @@ export const useGameStore = create<GameState>((set, get) => ({
   endTurn: () => {
     const { socket, roomId, playerId } = get();
     if (socket && roomId && playerId) {
-      socket.emit('action', {
+      socket.emit('play_action', {
         roomId,
-        actionId: crypto.randomUUID(),
-        playerId,
-        action: 'END_TURN',
+        action: {
+          id: crypto.randomUUID(),
+          playerId,
+          action: 'END_TURN',
+        },
       });
     }
   },
