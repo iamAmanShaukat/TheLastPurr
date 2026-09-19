@@ -42,13 +42,17 @@ export const useGameStore = create<GameState>((set, get) => ({
   
   connect: () => {
     const socket = io('http://localhost:3000', {
-      transports: ['websocket'],
-      upgrade: false,
+      transports: ['websocket', 'polling'],
     });
 
     socket.on('connect', () => {
       console.log('Connected to server');
       set({ isConnected: true });
+    });
+
+    socket.on('connect_error', (error) => {
+      console.error('Connection error:', error);
+      set({ isConnected: false, error: error.message });
     });
 
     socket.on('room_joined', (data: { roomId: string; playerId: string; players: string[]; isHost: boolean }) => {
