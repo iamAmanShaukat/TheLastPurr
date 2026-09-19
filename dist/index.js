@@ -6,7 +6,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const GameEngine_1 = require("./engine/GameEngine");
 const GameServer_1 = require("./server/GameServer");
-const ExplodingKittensRules_1 = require("./games/exploding-kittens/ExplodingKittensRules");
+const ExplodingKittensRuleSet_1 = require("./games/exploding-kittens/ExplodingKittensRuleSet");
 // Configuration
 const config = {
     port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
@@ -15,7 +15,7 @@ const config = {
     reconnectTimeoutMs: 60000 // 60 seconds
 };
 // Initialize the game engine with Exploding Kittens rules
-const ruleSet = new ExplodingKittensRules_1.ExplodingKittensRuleSet();
+const ruleSet = new ExplodingKittensRuleSet_1.ExplodingKittensRuleSet();
 const engine = new GameEngine_1.GameEngine(ruleSet);
 // Create and start the server
 const server = new GameServer_1.GameServer(engine, config);
