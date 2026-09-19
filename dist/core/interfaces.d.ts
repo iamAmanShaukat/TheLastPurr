@@ -22,6 +22,8 @@ export interface IPlayer {
     isDisconnected: boolean;
     lastActiveAt: number;
     metadata?: Record<string, any>;
+    isBot?: boolean;
+    peekedCards?: ICard[];
 }
 export type PlayerStatus = 'WAITING' | 'PLAYING' | 'ELIMINATED' | 'DISCONNECTED' | 'WINNER';
 export interface IDeck {
@@ -96,7 +98,7 @@ export interface IGameEngine {
     createRoom(roomId: string, maxPlayers: number): IRoom;
     joinRoom(room: IRoom, player: IPlayer): IRoom;
     leaveRoom(room: IRoom, playerId: string): IRoom;
-    processAction(room: IRoom, action: IAction): IRoom;
+    processAction(room: IRoom, action: IAction): Promise<IRoom>;
     handleDisconnect(room: IRoom, playerId: string): IRoom;
     handleReconnect(room: IRoom, playerId: string, socketId: string): IRoom;
     getSanitizedState(room: IRoom, playerId: string): IGameState | null;

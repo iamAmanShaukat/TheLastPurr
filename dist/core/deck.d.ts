@@ -6,7 +6,7 @@ import { IDeck, ICard } from '../core/interfaces';
 export declare class Deck implements IDeck {
     cards: ICard[];
     discardPile: ICard[];
-    constructor(initialCards?: ICard[]);
+    constructor(initialCards?: ICard[], initialDiscardPile?: ICard[]);
     /**
      * Fisher-Yates shuffle algorithm
      */

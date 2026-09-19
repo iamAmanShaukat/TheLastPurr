@@ -33,7 +33,7 @@ export class GameServer {
     
     this.io = new SocketIOServer({
       cors: {
-        origin: ['http://localhost:5173', 'http://localhost:3000'],
+        origin: config.corsOrigins,
         methods: ['GET', 'POST'],
         credentials: true
       },
@@ -201,7 +201,7 @@ export class GameServer {
   /**
    * Handle playing an action
    */
-  private handlePlayAction(socket: Socket, roomId: string, action: IAction): void {
+  private async handlePlayAction(socket: Socket, roomId: string, action: IAction): Promise<void> {
     let room = this.rooms.get(roomId);
     if (!room || !room.gameState) {
       socket.emit('error', { message: 'Game not in progress' });
@@ -214,32 +214,30 @@ export class GameServer {
     }
 
     try {
-      room = this.engine.processAction(room, action);
+      // Process action asynchronously and wait for completion
+      room = await this.engine.processAction(room, action);
       this.rooms.set(roomId, room);
 
-      // Wait for action to be processed (in production, use proper async handling)
-      setTimeout(() => {
-        const currentRoom = this.rooms.get(roomId);
-        if (!currentRoom || !currentRoom.gameState) {
-          return;
-        }
+      const currentRoom = this.rooms.get(roomId);
+      if (!currentRoom || !currentRoom.gameState) {
+        return;
+      }
 
-        // Broadcast updated state to all players
-        currentRoom.players.forEach((player) => {
-          const sanitizedState = this.engine.getSanitizedState(currentRoom, player.id);
-          const playerSocket = this.io.sockets.sockets.get(player.socketId);
-          if (playerSocket && !player.isDisconnected) {
-            playerSocket.emit('state_update', { 
-              gameState: { ...sanitizedState, myPlayerId: player.id } 
-            });
-          }
-        });
-
-        // Update AFK timer
-        if (currentRoom.gameState?.currentPlayerId) {
-          this.startAfkTimer(currentRoom, currentRoom.gameState.currentPlayerId);
+      // Broadcast updated state to all players
+      currentRoom.players.forEach((player) => {
+        const sanitizedState = this.engine.getSanitizedState(currentRoom, player.id);
+        const playerSocket = this.io.sockets.sockets.get(player.socketId);
+        if (playerSocket && !player.isDisconnected) {
+          playerSocket.emit('state_update', { 
+            gameState: { ...sanitizedState, myPlayerId: player.id } 
+          });
         }
-      }, 50);
+      });
+
+      // Update AFK timer
+      if (currentRoom.gameState?.currentPlayerId) {
+        this.startAfkTimer(currentRoom, currentRoom.gameState.currentPlayerId);
+      }
 
     } catch (error: any) {
       socket.emit('action_error', { 
@@ -328,7 +326,7 @@ export class GameServer {
   private startAfkTimer(room: IRoom, playerId: string): void {
     this.clearAfkTimer(playerId);
 
-    const timeout = setTimeout(() => {
+    const timeout = setTimeout(async () => {
       console.log(`Player ${playerId} AFK timeout in room ${room.id}`);
       
       // Auto-pass turn
@@ -341,8 +339,12 @@ export class GameServer {
           createdAt: Date.now()
         };
 
-        room = this.engine.processAction(room, passAction);
-        this.rooms.set(room.id, room);
+        try {
+          room = await this.engine.processAction(room, passAction);
+          this.rooms.set(room.id, room);
+        } catch (error) {
+          console.error(`Error processing AFK pass action:`, error);
+        }
       }
     }, this.config.afkTimeoutMs);
 

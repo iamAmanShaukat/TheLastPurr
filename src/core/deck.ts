@@ -9,9 +9,9 @@ export class Deck implements IDeck {
   cards: ICard[];
   discardPile: ICard[];
 
-  constructor(initialCards: ICard[] = []) {
+  constructor(initialCards: ICard[] = [], initialDiscardPile: ICard[] = []) {
     this.cards = initialCards;
-    this.discardPile = [];
+    this.discardPile = initialDiscardPile;
   }
 
   /**
