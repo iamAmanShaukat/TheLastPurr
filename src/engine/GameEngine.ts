@@ -83,7 +83,7 @@ export class GameEngine implements IGameEngine {
   /**
    * Process an action with locking and idempotency checks
    */
-  processAction(room: IRoom, action: IAction): IRoom {
+  async processAction(room: IRoom, action: IAction): Promise<IRoom> {
     // Check idempotency
     if (!this.processedActions.has(room.id)) {
       this.processedActions.set(room.id, new Set());
@@ -127,8 +127,12 @@ export class GameEngine implements IGameEngine {
         // Cleanup old processed actions (keep last 100 per room)
         if (processedSet.size > 100) {
           const arr = Array.from(processedSet);
-          arr.splice(0, arr.length - 100);
-          this.processedActions.set(room.id, new Set(arr));
+          processedSet.clear();
+          // Keep only the last 100 action IDs
+          const startIndex = Math.max(0, arr.length - 100);
+          for (let i = startIndex; i < arr.length; i++) {
+            processedSet.add(arr[i]);
+          }
         }
       } catch (error) {
         console.error(`Error processing action ${action.id}:`, error);
@@ -138,8 +142,9 @@ export class GameEngine implements IGameEngine {
 
     this.roomLocks.set(room.id, newLock);
     
-    // Return room immediately (action will be processed asynchronously)
-    // In production, you might want to wait for the lock
+    // Wait for the action to be fully processed before returning
+    await newLock;
+    
     return room;
   }
 
@@ -238,10 +243,27 @@ export class GameEngine implements IGameEngine {
   }
 
   /**
-   * Deep clone game state
+   * Deep clone game state while preserving Deck class instance
    */
   private cloneGameState(state: IGameState): IGameState {
-    return JSON.parse(JSON.stringify(state));
+    // Clone the state without the deck first
+    const clonedState = JSON.parse(JSON.stringify({
+      ...state,
+      deck: null
+    })) as IGameState;
+    
+    // Preserve the Deck instance by creating a new one with same data
+    if (state.deck instanceof Deck) {
+      clonedState.deck = new Deck(
+        state.deck.cards.map(card => ({ ...card })),
+        state.deck.discardPile.map(card => ({ ...card }))
+      );
+    } else {
+      // Fallback for non-Deck instances
+      clonedState.deck = JSON.parse(JSON.stringify(state.deck));
+    }
+    
+    return clonedState;
   }
 
   /**

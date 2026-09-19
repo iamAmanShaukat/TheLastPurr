@@ -65,6 +65,7 @@ export declare class ExplodingKittensRuleSet extends BaseRuleSet {
     private resolveFavor;
     /**
      * Resolve a Cat Combo - trade cards with another player
+     * Players can exchange one card from their hand for one card from the target's hand
      */
     private resolveCatCombo;
     /**

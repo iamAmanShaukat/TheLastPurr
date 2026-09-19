@@ -17,7 +17,7 @@ class GameServer {
         this.reconnectTimers = new Map();
         this.io = new socket_io_1.Server({
             cors: {
-                origin: ['http://localhost:5173', 'http://localhost:3000'],
+                origin: config.corsOrigins,
                 methods: ['GET', 'POST'],
                 credentials: true
             },
@@ -158,7 +158,7 @@ class GameServer {
     /**
      * Handle playing an action
      */
-    handlePlayAction(socket, roomId, action) {
+    async handlePlayAction(socket, roomId, action) {
         let room = this.rooms.get(roomId);
         if (!room || !room.gameState) {
             socket.emit('error', { message: 'Game not in progress' });
@@ -169,29 +169,27 @@ class GameServer {
             action.id = (0, uuid_1.v4)();
         }
         try {
-            room = this.engine.processAction(room, action);
+            // Process action asynchronously and wait for completion
+            room = await this.engine.processAction(room, action);
             this.rooms.set(roomId, room);
-            // Wait for action to be processed (in production, use proper async handling)
-            setTimeout(() => {
-                const currentRoom = this.rooms.get(roomId);
-                if (!currentRoom || !currentRoom.gameState) {
-                    return;
+            const currentRoom = this.rooms.get(roomId);
+            if (!currentRoom || !currentRoom.gameState) {
+                return;
+            }
+            // Broadcast updated state to all players
+            currentRoom.players.forEach((player) => {
+                const sanitizedState = this.engine.getSanitizedState(currentRoom, player.id);
+                const playerSocket = this.io.sockets.sockets.get(player.socketId);
+                if (playerSocket && !player.isDisconnected) {
+                    playerSocket.emit('state_update', {
+                        gameState: { ...sanitizedState, myPlayerId: player.id }
+                    });
                 }
-                // Broadcast updated state to all players
-                currentRoom.players.forEach((player) => {
-                    const sanitizedState = this.engine.getSanitizedState(currentRoom, player.id);
-                    const playerSocket = this.io.sockets.sockets.get(player.socketId);
-                    if (playerSocket && !player.isDisconnected) {
-                        playerSocket.emit('state_update', {
-                            gameState: { ...sanitizedState, myPlayerId: player.id }
-                        });
-                    }
-                });
-                // Update AFK timer
-                if (currentRoom.gameState?.currentPlayerId) {
-                    this.startAfkTimer(currentRoom, currentRoom.gameState.currentPlayerId);
-                }
-            }, 50);
+            });
+            // Update AFK timer
+            if (currentRoom.gameState?.currentPlayerId) {
+                this.startAfkTimer(currentRoom, currentRoom.gameState.currentPlayerId);
+            }
         }
         catch (error) {
             socket.emit('action_error', {
@@ -264,7 +262,7 @@ class GameServer {
      */
     startAfkTimer(room, playerId) {
         this.clearAfkTimer(playerId);
-        const timeout = setTimeout(() => {
+        const timeout = setTimeout(async () => {
             console.log(`Player ${playerId} AFK timeout in room ${room.id}`);
             // Auto-pass turn
             if (room.gameState) {
@@ -275,8 +273,13 @@ class GameServer {
                     metadata: {},
                     createdAt: Date.now()
                 };
-                room = this.engine.processAction(room, passAction);
-                this.rooms.set(room.id, room);
+                try {
+                    room = await this.engine.processAction(room, passAction);
+                    this.rooms.set(room.id, room);
+                }
+                catch (error) {
+                    console.error(`Error processing AFK pass action:`, error);
+                }
             }
         }, this.config.afkTimeoutMs);
         this.afkTimers.set(playerId, timeout);

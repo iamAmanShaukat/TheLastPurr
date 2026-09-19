@@ -9,10 +9,12 @@ import {
   ICard,
   ActionType,
   PlayerStatus,
-  GamePhase
+  GamePhase,
+  createCard
 } from '../../core/interfaces';
 import { Deck } from '../../core/deck';
 import { BaseRuleSet } from '../../engine/BaseRuleSet';
+import { v4 as uuidv4 } from 'uuid';
 
 // Card types specific to Exploding Kittens
 export const EK_CARD_TYPES = {
@@ -77,75 +79,43 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
     
     // Add Exploding Kittens (one fewer than players)
     for (let i = 0; i < playerCount - 1; i++) {
-      cards.push({
-        id: `ek_${i}`,
-        type: EK_CARD_TYPES.EXPLODING_KITTEN,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.EXPLODING_KITTEN, { index: i }));
     }
     
     // Add Defuses (one per player, plus extras)
     const defuseCount = playerCount + 2;
     for (let i = 0; i < defuseCount; i++) {
-      cards.push({
-        id: `def_${i}`,
-        type: EK_CARD_TYPES.DEFUSE,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.DEFUSE, { index: i }));
     }
     
     // Add Attack cards (4 in base game)
     for (let i = 0; i < 4; i++) {
-      cards.push({
-        id: `atk_${i}`,
-        type: EK_CARD_TYPES.ATTACK,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.ATTACK, { index: i }));
     }
     
     // Add Skip cards (4 in base game)
     for (let i = 0; i < 4; i++) {
-      cards.push({
-        id: `skp_${i}`,
-        type: EK_CARD_TYPES.SKIP,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.SKIP, { index: i }));
     }
     
     // Add See the Future cards (5 in base game)
     for (let i = 0; i < 5; i++) {
-      cards.push({
-        id: `sf_${i}`,
-        type: EK_CARD_TYPES.SEE_FUTURE,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.SEE_FUTURE, { index: i }));
     }
     
     // Add Shuffle cards (4 in base game)
     for (let i = 0; i < 4; i++) {
-      cards.push({
-        id: `shf_${i}`,
-        type: EK_CARD_TYPES.SHUFFLE,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.SHUFFLE, { index: i }));
     }
     
     // Add Favor cards (4 in base game)
     for (let i = 0; i < 4; i++) {
-      cards.push({
-        id: `fav_${i}`,
-        type: EK_CARD_TYPES.FAVOR,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.FAVOR, { index: i }));
     }
     
     // Add Nope cards (5 in base game)
     for (let i = 0; i < 5; i++) {
-      cards.push({
-        id: `nope_${i}`,
-        type: EK_CARD_TYPES.NOPE,
-        metadata: {}
-      });
+      cards.push(createCard(EK_CARD_TYPES.NOPE, { index: i }));
     }
     
     // Add Cat cards (6 of each type in base game)
@@ -159,11 +129,7 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
     
     catTypes.forEach(catType => {
       for (let i = 0; i < 6; i++) {
-        cards.push({
-          id: `${catType}_${i}`,
-          type: catType,
-          metadata: {}
-        });
+        cards.push(createCard(catType, { index: i }));
       }
     });
     
@@ -480,24 +446,62 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
 
   /**
    * Resolve a Cat Combo - trade cards with another player
+   * Players can exchange one card from their hand for one card from the target's hand
    */
   private resolveCatCombo(gameState: IGameState, action: IAction): IGameState {
     const actor = gameState.players.find(p => p.id === action.playerId);
     const target = gameState.players.find(p => p.id === action.targetPlayerId);
     
-    if (!actor || !target) {
+    if (!actor || !target || !action.cardId) {
       return gameState;
     }
     
-    // Implementation depends on specific cat combo rules
-    // This is a simplified version
+    // Find the card in actor's hand (one of the cat cards used for combo)
+    const actorCardIndex = actor.hand.findIndex(c => c.id === action.cardId);
+    if (actorCardIndex === -1) {
+      return gameState;
+    }
     
-    gameState.gameLog.push({
-      timestamp: Date.now(),
-      playerId: actor.id,
-      action: 'CAT_COMBO',
-      details: { targetId: target.id }
-    });
+    // If targetPlayer specified and target has cards, perform a trade
+    if (target.hand.length > 0) {
+      // Get the card to trade from target (random or specified by metadata)
+      let targetCardIndex = action.metadata?.targetCardIndex ?? Math.floor(Math.random() * target.hand.length);
+      targetCardIndex = Math.max(0, Math.min(targetCardIndex, target.hand.length - 1));
+      
+      // Perform the trade
+      const [actorCard] = actor.hand.splice(actorCardIndex, 1);
+      const [targetCard] = target.hand.splice(targetCardIndex, 1);
+      
+      actor.hand.push(targetCard);
+      target.hand.push(actorCard);
+      
+      gameState.gameLog.push({
+        timestamp: Date.now(),
+        playerId: actor.id,
+        action: 'CAT_COMBO',
+        details: { 
+          targetId: target.id,
+          tradedCardType: actorCard.type,
+          receivedCardType: targetCard.type
+        }
+      });
+    } else {
+      // Target has no cards, just discard the cat card
+      const [actorCard] = actor.hand.splice(actorCardIndex, 1);
+      const deck = gameState.deck as Deck;
+      deck.addToDiscard([actorCard]);
+      
+      gameState.gameLog.push({
+        timestamp: Date.now(),
+        playerId: actor.id,
+        action: 'CAT_COMBO',
+        details: { 
+          targetId: target.id,
+          reason: 'target_has_no_cards',
+          discardedCardType: actorCard.type
+        }
+      });
+    }
     
     return gameState;
   }
@@ -586,7 +590,7 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
         id: p.id,
         name: p.name,
         hand: Array(p.hand.length).fill({ type: 'hidden' }),
-        isBot: p.isBot,
+        isBot: p.isBot || false,
         status: p.status,
         isDisconnected: p.isDisconnected
       };
@@ -606,7 +610,7 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
     // Hide peeked cards of other players
     sanitized.players.forEach((p: any) => {
       if (p.id !== playerId) {
-        p.peekedCards = [];
+        p.peekedCards = p.peekedCards || [];
       }
     });
     

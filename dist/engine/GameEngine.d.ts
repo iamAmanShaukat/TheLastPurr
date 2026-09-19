@@ -23,7 +23,7 @@ export declare class GameEngine implements IGameEngine {
     /**
      * Process an action with locking and idempotency checks
      */
-    processAction(room: IRoom, action: IAction): IRoom;
+    processAction(room: IRoom, action: IAction): Promise<IRoom>;
     /**
      * Validate an action before execution
      */
@@ -46,7 +46,7 @@ export declare class GameEngine implements IGameEngine {
      */
     getSanitizedState(room: IRoom, playerId: string): IGameState | null;
     /**
-     * Deep clone game state
+     * Deep clone game state while preserving Deck class instance
      */
     private cloneGameState;
     /**

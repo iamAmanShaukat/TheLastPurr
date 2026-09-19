@@ -6,9 +6,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Deck = void 0;
 class Deck {
-    constructor(initialCards = []) {
+    constructor(initialCards = [], initialDiscardPile = []) {
         this.cards = initialCards;
-        this.discardPile = [];
+        this.discardPile = initialDiscardPile;
     }
     /**
      * Fisher-Yates shuffle algorithm
