@@ -53,13 +53,13 @@ export const GameBoard: React.FC = () => {
 
   return (
     <div className="animated-bg min-h-screen flex items-center justify-center p-4 md:p-6">
-      <div className="w-full max-w-7xl">
+      <div className="w-full max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-8">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-4 md:p-6"
+          className="glass rounded-2xl p-6 md:p-8"
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-center md:text-left">
@@ -93,9 +93,9 @@ export const GameBoard: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-6"
+          className="mb-8"
         >
-          <div className="glow-red bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-4 backdrop-blur-sm">
+          <div className="glow-red bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-6 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="w-6 h-6 text-red-400" />
               <h3 className="text-white font-bold text-lg">Action Stack (Respond with Nope!)</h3>
@@ -118,7 +118,7 @@ export const GameBoard: React.FC = () => {
       )}
 
       {/* Main Game Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
         {/* Other Players */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center gap-2 text-white mb-2">
@@ -131,7 +131,7 @@ export const GameBoard: React.FC = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="glass rounded-xl p-4"
+              className="glass rounded-xl p-6"
             >
               <div className="flex justify-between items-center mb-3">
                 <span className={`font-bold text-lg ${player.isAlive ? 'text-green-400' : 'text-red-400 line-through'}`}>
