@@ -2,17 +2,27 @@ import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 import { IGameState } from '../types/game';
 
+interface Player {
+  id: string;
+  name: string;
+  isHost: boolean;
+}
+
 interface GameState {
   socket: Socket | null;
   isConnected: boolean;
   roomId: string | null;
   playerId: string | null;
+  playerName: string | null;
   gameState: IGameState | null;
+  lobbyPlayers: Player[];
+  isHost: boolean;
   error: string | null;
   
   connect: () => void;
   disconnect: () => void;
   joinRoom: (roomId: string, playerName: string) => void;
+  leaveRoom: () => void;
   startGame: (roomId: string) => void;
   playCard: (cardId: string, targetId?: string, targetIndex?: number) => void;
   drawCard: () => void;
@@ -24,7 +34,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   isConnected: false,
   roomId: null,
   playerId: null,
+  playerName: null,
   gameState: null,
+  lobbyPlayers: [],
+  isHost: false,
   error: null,
   
   connect: () => {
@@ -38,9 +51,38 @@ export const useGameStore = create<GameState>((set, get) => ({
       set({ isConnected: true });
     });
 
-    socket.on('room_joined', (data: { roomId: string; playerId: string; players: any[] }) => {
+    socket.on('room_joined', (data: { roomId: string; playerId: string; players: string[]; isHost: boolean }) => {
       console.log('Joined room:', data);
-      set({ playerId: data.playerId, roomId: data.roomId });
+      set({ 
+        playerId: data.playerId, 
+        roomId: data.roomId,
+        isHost: data.isHost,
+        lobbyPlayers: data.players.map((id, index) => ({
+          id,
+          name: index === 0 ? 'Player ' + (index + 1) : 'Player ' + (index + 1),
+          isHost: index === 0
+        }))
+      });
+    });
+
+    socket.on('player_joined', (data: { playerId: string }) => {
+      console.log('Player joined:', data);
+      const { lobbyPlayers } = get();
+      set({
+        lobbyPlayers: [...lobbyPlayers, {
+          id: data.playerId,
+          name: `Player ${lobbyPlayers.length + 1}`,
+          isHost: lobbyPlayers.length === 0
+        }]
+      });
+    });
+
+    socket.on('player_left', (data: { playerId: string }) => {
+      console.log('Player left:', data);
+      const { lobbyPlayers } = get();
+      set({
+        lobbyPlayers: lobbyPlayers.filter(p => p.id !== data.playerId)
+      });
     });
 
     socket.on('game_started', (data: { gameState: IGameState & { myPlayerId: string } }) => {
@@ -76,7 +118,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { socket } = get();
     if (socket) {
       socket.disconnect();
-      set({ socket: null, isConnected: false, roomId: null, playerId: null, gameState: null });
+      set({ socket: null, isConnected: false, roomId: null, playerId: null, playerName: null, gameState: null, lobbyPlayers: [], isHost: false });
     }
   },
 
@@ -84,7 +126,16 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { socket } = get();
     if (socket) {
       socket.emit('join_room', { roomId, playerName });
+      set({ playerName });
     }
+  },
+
+  leaveRoom: () => {
+    const { socket, roomId } = get();
+    if (socket && roomId) {
+      socket.emit('leave_room', { roomId });
+    }
+    set({ roomId: null, playerId: null, playerName: null, lobbyPlayers: [], isHost: false, gameState: null });
   },
 
   startGame: (roomId: string) => {
