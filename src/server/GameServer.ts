@@ -33,9 +33,12 @@ export class GameServer {
     
     this.io = new SocketIOServer({
       cors: {
-        origin: config.corsOrigins,
-        methods: ['GET', 'POST']
-      }
+        origin: ['http://localhost:5173', 'http://localhost:3000'],
+        methods: ['GET', 'POST'],
+        credentials: true
+      },
+      pingTimeout: 60000,
+      pingInterval: 25000
     });
 
     this.setupSocketHandlers();
