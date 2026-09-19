@@ -206,9 +206,14 @@ export class GameServer {
 
       // Wait for action to be processed (in production, use proper async handling)
       setTimeout(() => {
+        const currentRoom = this.rooms.get(roomId);
+        if (!currentRoom || !currentRoom.gameState) {
+          return;
+        }
+
         // Broadcast updated state to all players
-        room.players.forEach((player) => {
-          const sanitizedState = this.engine.getSanitizedState(room, player.id);
+        currentRoom.players.forEach((player) => {
+          const sanitizedState = this.engine.getSanitizedState(currentRoom, player.id);
           const playerSocket = this.io.sockets.sockets.get(player.socketId);
           if (playerSocket && !player.isDisconnected) {
             playerSocket.emit('state_update', { gameState: sanitizedState });
@@ -216,8 +221,8 @@ export class GameServer {
         });
 
         // Update AFK timer
-        if (room.gameState?.currentPlayerId) {
-          this.startAfkTimer(room, room.gameState.currentPlayerId);
+        if (currentRoom.gameState?.currentPlayerId) {
+          this.startAfkTimer(currentRoom, currentRoom.gameState.currentPlayerId);
         }
       }, 50);
 
