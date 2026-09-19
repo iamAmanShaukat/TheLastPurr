@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { useGameStore } from '../store/gameStore';
 
 export function useGameSocket() {
-  const { disconnect, isConnected, error } = useGameStore();
-
+  const { socket, isConnected, error, joinRoom, startGame, disconnect } = useGameStore();
+  
   useEffect(() => {
     return () => {
-      disconnect();
+      // Optional cleanup if needed
     };
-  }, [disconnect]);
-
-  return { isConnected, error };
+  }, []);
+  
+  return { socket, isConnected, error, joinRoom, startGame, disconnect };
 }
