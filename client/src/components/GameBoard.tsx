@@ -52,14 +52,14 @@ export const GameBoard: React.FC = () => {
   };
 
   return (
-    <div className="animated-bg min-h-screen flex items-center justify-center p-4 md:p-6">
-      <div className="w-full max-w-7xl mx-auto">
+    <div className="animated-bg min-h-screen flex flex-col items-center justify-center p-4 md:p-6">
+      <div className="w-full max-w-6xl mx-auto flex flex-col items-center">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-8 w-full flex justify-center">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-6 md:p-8"
+          className="glass rounded-2xl p-6 md:p-8 w-full max-w-4xl"
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-center md:text-left">
@@ -93,9 +93,9 @@ export const GameBoard: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-8"
+          className="mb-8 w-full flex justify-center"
         >
-          <div className="glow-red bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-6 backdrop-blur-sm">
+          <div className="glow-red bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-6 backdrop-blur-sm w-full max-w-4xl">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="w-6 h-6 text-red-400" />
               <h3 className="text-white font-bold text-lg">Action Stack (Respond with Nope!)</h3>
@@ -117,11 +117,11 @@ export const GameBoard: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Main Game Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* Other Players */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center gap-2 text-white mb-2">
+      {/* Main Game Area - Centered Layout */}
+      <div className="flex flex-col lg:flex-row gap-8 mb-8 w-full justify-center items-start">
+        {/* Other Players - Left Side */}
+        <div className="w-full lg:w-1/3 space-y-4">
+          <div className="flex items-center gap-2 text-white mb-2 justify-center lg:justify-start">
             <Users className="w-6 h-6" />
             <h2 className="text-xl font-bold">Other Players</h2>
           </div>
@@ -159,12 +159,12 @@ export const GameBoard: React.FC = () => {
           ))}
         </div>
 
-        {/* Deck & Controls */}
-        <div className="space-y-4">
+        {/* Deck & Controls - Right Side */}
+        <div className="w-full lg:w-1/3 space-y-4 flex flex-col items-center">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass rounded-2xl p-6 flex flex-col items-center"
+            className="glass rounded-2xl p-6 flex flex-col items-center w-full"
           >
             <h2 className="text-xl font-bold text-white mb-4">Draw Deck</h2>
             <Deck 
@@ -178,7 +178,7 @@ export const GameBoard: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass rounded-2xl p-4"
+              className="glass rounded-2xl p-4 w-full"
             >
               <motion.button
                 onClick={handleEndTurn}
@@ -195,9 +195,9 @@ export const GameBoard: React.FC = () => {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glow-purple bg-yellow-600/20 border border-yellow-500/50 rounded-2xl p-4 backdrop-blur-sm"
+              className="glow-purple bg-yellow-600/20 border border-yellow-500/50 rounded-2xl p-4 backdrop-blur-sm w-full"
             >
-              <p className="text-white mb-3 font-semibold">Playing: <span className="text-yellow-400">{selectedCard.type}</span></p>
+              <p className="text-white mb-3 font-semibold text-center">Playing: <span className="text-yellow-400">{selectedCard.type}</span></p>
               <div className="flex gap-2">
                 <motion.button
                   onClick={handlePlaySelectedCard}
@@ -221,14 +221,14 @@ export const GameBoard: React.FC = () => {
         </div>
       </div>
 
-      {/* My Hand */}
-      <div>
+      {/* My Hand - Centered at Bottom */}
+      <div className="w-full flex justify-center">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-6"
+          className="glass rounded-2xl p-6 w-full max-w-6xl"
         >
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 justify-center">
             Your Hand 
             <span className="bg-purple-500/20 px-3 py-1 rounded-lg">{myPlayer?.hand.length || 0} cards</span>
           </h2>

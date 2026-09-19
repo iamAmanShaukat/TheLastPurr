@@ -18,8 +18,8 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const sizeClasses = {
     small: 'w-20 h-28 text-xs',
-    medium: 'w-32 h-44 text-sm',
-    large: 'w-48 h-64 text-base',
+    medium: 'w-40 h-56 text-sm',
+    large: 'w-56 h-72 text-base',
   };
 
   const getCardColor = (type: string) => {
@@ -62,24 +62,24 @@ export const Card: React.FC<CardProps> = ({
         select-none
       `}
     >
-      {/* Card Header - Type Name */}
-      <div className="w-full bg-black/30 rounded-lg px-3 py-2 mb-3">
-        <div className="font-bold text-center leading-tight text-white drop-shadow-lg text-lg">
+      {/* Card Header - Type Name with Label */}
+      <div className="w-full bg-black/40 rounded-lg px-4 py-3 mb-3 border border-white/10">
+        <div className="font-bold text-center leading-tight text-white drop-shadow-lg text-xl tracking-wide uppercase">
           {card.type}
         </div>
       </div>
       
       {/* Card Center - Image Placeholder Area */}
-      <div className="flex-1 w-full bg-white/10 rounded-lg flex items-center justify-center mb-3">
-        <div className="text-6xl">
+      <div className="flex-1 w-full bg-white/15 rounded-lg flex items-center justify-center mb-3 border border-white/10">
+        <div className="text-7xl">
           {card.metadata.icon || '🃏'}
         </div>
       </div>
       
       {/* Card Bottom - Description */}
       {card.metadata.description && (
-        <div className="w-full bg-black/30 rounded-lg px-3 py-2">
-          <div className="text-xs opacity-90 text-center text-white/90 drop-shadow leading-tight">
+        <div className="w-full bg-black/40 rounded-lg px-4 py-3 border border-white/10">
+          <div className="text-sm opacity-95 text-center text-white/95 drop-shadow leading-relaxed font-medium">
             {card.metadata.description}
           </div>
         </div>
