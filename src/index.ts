@@ -5,7 +5,7 @@
 
 import { GameEngine } from './engine/GameEngine';
 import { GameServer } from './server/GameServer';
-import { ExplodingKittensRuleSet } from './games/exploding-kittens/ExplodingKittensRules';
+import { ExplodingKittensRuleSet } from './games/exploding-kittens/ExplodingKittensRuleSet';
 
 // Configuration
 const config = {
