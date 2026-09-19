@@ -53,13 +53,15 @@ export const GameBoard: React.FC = () => {
 
   return (
     <div className="animated-bg min-h-screen flex flex-col items-center justify-center p-4 md:p-6">
-      <div className="w-full max-w-6xl mx-auto flex flex-col items-center">
-      {/* Header */}
-      <div className="mb-8 w-full flex justify-center">
+      {/* Main centered container */}
+      <div className="w-full max-w-7xl mx-auto flex flex-col items-center space-y-6">
+      
+      {/* Header - Full width, centered */}
+      <div className="w-full flex justify-center">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-6 md:p-8 w-full max-w-4xl"
+          className="glass rounded-2xl p-6 md:p-8 w-full max-w-5xl"
         >
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-center md:text-left">
@@ -88,19 +90,19 @@ export const GameBoard: React.FC = () => {
         </motion.div>
       </div>
 
-      {/* Action Stack */}
+      {/* Action Stack - Centered */}
       {gameState.actionStack.length > 0 && (
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="mb-8 w-full flex justify-center"
+          className="w-full flex justify-center"
         >
-          <div className="glow-red bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-6 backdrop-blur-sm w-full max-w-4xl">
-            <div className="flex items-center gap-2 mb-3">
+          <div className="glow-red bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-6 backdrop-blur-sm w-full max-w-5xl">
+            <div className="flex items-center gap-2 mb-3 justify-center">
               <Zap className="w-6 h-6 text-red-400" />
               <h3 className="text-white font-bold text-lg">Action Stack (Respond with Nope!)</h3>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 justify-center flex-wrap">
               {gameState.actionStack.map((item, idx) => (
                 <motion.div 
                   key={idx}
@@ -117,11 +119,12 @@ export const GameBoard: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Main Game Area - Centered Layout */}
-      <div className="flex flex-col lg:flex-row gap-8 mb-8 w-full justify-center items-start">
-        {/* Other Players - Left Side */}
-        <div className="w-full lg:w-1/3 space-y-4">
-          <div className="flex items-center gap-2 text-white mb-2 justify-center lg:justify-start">
+      {/* Main Game Area - Centered with proper spacing */}
+      <div className="w-full flex flex-col lg:flex-row gap-6 justify-center items-start">
+        
+        {/* Left Column - Other Players */}
+        <div className="w-full lg:w-80 flex-shrink-0 space-y-4">
+          <div className="flex items-center gap-2 text-white mb-2 justify-center">
             <Users className="w-6 h-6" />
             <h2 className="text-xl font-bold">Other Players</h2>
           </div>
@@ -141,7 +144,7 @@ export const GameBoard: React.FC = () => {
                   {player.hand.length} cards
                 </span>
               </div>
-              <div className="flex gap-1 flex-wrap">
+              <div className="flex gap-1 flex-wrap justify-center">
                 {Array.from({ length: Math.min(player.hand.length, 15) }).map((_, idx) => (
                   <motion.div 
                     key={idx}
@@ -159,14 +162,14 @@ export const GameBoard: React.FC = () => {
           ))}
         </div>
 
-        {/* Deck & Controls - Right Side */}
-        <div className="w-full lg:w-1/3 space-y-4 flex flex-col items-center">
+        {/* Center Column - Deck & Controls */}
+        <div className="w-full lg:w-64 flex-shrink-0 flex flex-col items-center space-y-4">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="glass rounded-2xl p-6 flex flex-col items-center w-full"
           >
-            <h2 className="text-xl font-bold text-white mb-4">Draw Deck</h2>
+            <h2 className="text-xl font-bold text-white mb-4 text-center">Draw Deck</h2>
             <Deck 
               count={gameState.deckCount} 
               onDraw={handleDrawCard}
@@ -186,7 +189,7 @@ export const GameBoard: React.FC = () => {
                 whileTap={{ scale: 0.98 }}
                 className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg hover:shadow-blue-500/25"
               >
-                End Turn (Draw Card)
+                End Turn
               </motion.button>
             </motion.div>
           )}
@@ -221,12 +224,12 @@ export const GameBoard: React.FC = () => {
         </div>
       </div>
 
-      {/* My Hand - Centered at Bottom */}
-      <div className="w-full flex justify-center">
+      {/* Bottom Section - My Hand - Full width, centered */}
+      <div className="w-full flex justify-center pt-4">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass rounded-2xl p-6 w-full max-w-6xl"
+          className="glass rounded-2xl p-6 w-full max-w-7xl"
         >
           <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 justify-center">
             Your Hand 
