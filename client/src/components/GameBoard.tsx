@@ -52,9 +52,10 @@ export const GameBoard: React.FC = () => {
   };
 
   return (
-    <div className="animated-bg min-h-screen p-4 md:p-6">
+    <div className="animated-bg min-h-screen flex items-center justify-center p-4 md:p-6">
+      <div className="w-full max-w-7xl">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-6">
+      <div className="mb-6">
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -92,7 +93,7 @@ export const GameBoard: React.FC = () => {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="max-w-7xl mx-auto mb-6"
+          className="mb-6"
         >
           <div className="glow-red bg-red-900/30 border-2 border-red-500/50 rounded-2xl p-4 backdrop-blur-sm">
             <div className="flex items-center gap-2 mb-3">
@@ -117,7 +118,7 @@ export const GameBoard: React.FC = () => {
       )}
 
       {/* Main Game Area */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Other Players */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center gap-2 text-white mb-2">
@@ -221,7 +222,7 @@ export const GameBoard: React.FC = () => {
       </div>
 
       {/* My Hand */}
-      <div className="max-w-7xl mx-auto">
+      <div>
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -237,6 +238,7 @@ export const GameBoard: React.FC = () => {
             isMyTurn={isMyTurn || isDefusing}
           />
         </motion.div>
+      </div>
       </div>
 
       {/* Game Over */}
