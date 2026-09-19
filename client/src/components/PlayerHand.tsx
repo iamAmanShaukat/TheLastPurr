@@ -23,7 +23,7 @@ export const PlayerHand: React.FC<PlayerHandProps> = ({
 
   return (
     <motion.div 
-      className="flex flex-row justify-center items-center gap-8 p-6 overflow-x-auto min-w-max"
+      className="flex flex-row justify-center items-center gap-6 p-6 overflow-x-auto"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
