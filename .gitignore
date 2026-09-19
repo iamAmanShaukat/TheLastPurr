@@ -1,14 +1,14 @@
-```gitignore
+```
 # Dependencies
 node_modules/
 
-# Build outputs
+# Build artifacts
 dist/
 build/
 *.js.map
 *.ts.map
 
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
@@ -22,28 +22,31 @@ build/
 # Logs
 *.log
 
-# Python cache (if any Python files exist in client)
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Coverage reports
+# Coverage
 coverage/
 htmlcov/
 .coverage
 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.nox/
+.pytest_cache/
+.mypy_cache/
+
 # Temporary files
 *.tmp
+*~
 .DS_Store
 Thumbs.db
-
-# Testing
-.nyc_output/
-coverage/lcov-report/
-
-# TypeScript/JavaScript specific
-.next/
-.nuxt/
-public/dist/
 ```
