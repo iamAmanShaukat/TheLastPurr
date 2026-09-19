@@ -10,8 +10,10 @@ interface GameState {
   gameState: IGameState | null;
   error: string | null;
   
-  connect: (roomId: string, playerName: string) => void;
+  connect: () => void;
   disconnect: () => void;
+  joinRoom: (roomId: string, playerName: string) => void;
+  startGame: (roomId: string) => void;
   playCard: (cardId: string, targetId?: string, targetIndex?: number) => void;
   drawCard: () => void;
   endTurn: () => void;
@@ -24,8 +26,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   playerId: null,
   gameState: null,
   error: null,
-
-  connect: (roomId: string, playerName: string) => {
+  
+  connect: () => {
     const socket = io('http://localhost:3000', {
       transports: ['websocket'],
       upgrade: false,
@@ -33,15 +35,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     socket.on('connect', () => {
       console.log('Connected to server');
-      set({ isConnected: true, roomId });
-      
-      // Join room
-      socket.emit('join_room', { roomId, playerName });
+      set({ isConnected: true });
     });
 
     socket.on('room_joined', (data: { roomId: string; playerId: string; players: any[] }) => {
       console.log('Joined room:', data);
-      set({ playerId: data.playerId });
+      set({ playerId: data.playerId, roomId: data.roomId });
     });
 
     socket.on('game_started', (data: { gameState: IGameState & { myPlayerId: string } }) => {
@@ -78,6 +77,20 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (socket) {
       socket.disconnect();
       set({ socket: null, isConnected: false, roomId: null, playerId: null, gameState: null });
+    }
+  },
+
+  joinRoom: (roomId: string, playerName: string) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit('join_room', { roomId, playerName });
+    }
+  },
+
+  startGame: (roomId: string) => {
+    const { socket } = get();
+    if (socket) {
+      socket.emit('start_game', { roomId });
     }
   },
 

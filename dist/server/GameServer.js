@@ -80,10 +80,10 @@ class GameServer {
             socket.emit('room_joined', {
                 roomId: room.id,
                 playerId: player.id,
-                players: Array.from(room.players.values())
+                players: Array.from(room.players.keys()), isHost: Array.from(room.players.keys())[0] === player.id
             });
             // Broadcast to others
-            socket.to(roomId).emit('player_joined', { player });
+            socket.to(roomId).emit('player_joined', { playerId: player.id });
             console.log(`Player ${playerName} joined room ${roomId}`);
         }
         catch (error) {
@@ -251,7 +251,7 @@ class GameServer {
         socket.emit('room_joined', {
             roomId: room.id,
             playerId: player.id,
-            players: Array.from(room.players.values()),
+            players: Array.from(room.players.keys()), isHost: Array.from(room.players.keys())[0] === player.id,
             gameState: sanitizedState,
             reconnected: true
         });
