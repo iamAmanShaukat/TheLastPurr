@@ -84,6 +84,7 @@ export interface IGameState {
   winnerId: string | null;
   createdAt: number;
   lastUpdatedAt: number;
+  metadata?: Record<string, any>; // For game-specific temporary state (e.g., defuse tracking)
 }
 
 export interface IGameLogEntry {

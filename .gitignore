@@ -2,18 +2,15 @@
 # Build artifacts
 dist/
 *.js.map
+*.d.ts
+*.d.ts.map
 
 # Dependencies
 node_modules/
 
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Logs
+# Logs and temp files
 *.log
+*.tmp
 
 # Environment
 .env
@@ -24,22 +21,59 @@ __pycache__/
 .vscode/
 .idea/
 
-# OS
-.DS_Store
-Thumbs.db
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Compression
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 
 # Coverage
 coverage/
 htmlcov/
 .coverage
 
-# Tests
-.pytest_cache/
+# Testing
 .mypy_cache/
+.pytest_cache/
 
-# Distribution
-*.tar.gz
-*.zip
-*.tar
-*.gz
+# Java/Gradle
+target/
+.gradle/
+
+# Virtual environments
+.venv/
+venv/
 ```

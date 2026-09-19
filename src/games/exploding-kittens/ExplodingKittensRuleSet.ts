@@ -309,14 +309,21 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
         const hasDefuse = currentPlayer.hand.some(c => c.type === EK_CARD_TYPES.DEFUSE);
         
         if (hasDefuse) {
-          // Player can defuse - wait for placement decision
+          // Player can defuse - enter DEFUSE_PENDING phase
+          // Store the exploding kitten info in game state metadata
           gameState.phase = 'DEFUSE_PENDING';
+          if (!gameState.metadata) {
+            gameState.metadata = {};
+          }
+          gameState.metadata.explodingKittenCard = drawnCard;
+          
           gameState.gameLog.push({
             timestamp: Date.now(),
             playerId: currentPlayer.id,
             action: 'EXPLODING_KITTEN_DRAWN',
             details: { hasDefuse: true }
           });
+          // Don't pass turn yet - wait for defuse action
           return gameState;
         } else {
           // Player explodes!
@@ -395,7 +402,7 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
     
     const deck = gameState.deck as Deck;
     
-    // Find and remove the defuse card
+    // Find and remove the defuse card from player's hand
     const defuseIndex = player.hand.findIndex(c => c.type === EK_CARD_TYPES.DEFUSE);
     if (defuseIndex === -1) {
       return gameState;
@@ -404,20 +411,27 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
     const [defuseCard] = player.hand.splice(defuseIndex, 1);
     deck.addToDiscard([defuseCard]);
     
-    // Get the top card (the exploding kitten)
-    // In actual implementation, we'd track which card is the kitten
-    // For now, we assume it's being placed from a temporary holding area
+    // Get the exploding kitten card from metadata
+    const kittenCard = gameState.metadata?.explodingKittenCard as ICard | undefined;
+    if (!kittenCard) {
+      // Fallback: create a new kitten card if metadata is missing
+      const fallbackKitten: ICard = {
+        id: `ek_defused_${Date.now()}`,
+        type: EK_CARD_TYPES.EXPLODING_KITTEN,
+        metadata: { defusedBy: player.id }
+      };
+      deck.insertCard(fallbackKitten, action.targetIndex);
+    } else {
+      // Insert the actual kitten card at the specified index
+      deck.insertCard(kittenCard, action.targetIndex);
+    }
     
-    // Create the exploding kitten card to place back
-    const kittenCard: ICard = {
-      id: `ek_defused_${Date.now()}`,
-      type: EK_CARD_TYPES.EXPLODING_KITTEN,
-      metadata: { defusedBy: player.id }
-    };
+    // Clear the metadata
+    if (gameState.metadata) {
+      delete gameState.metadata.explodingKittenCard;
+    }
     
-    // Place it at the specified index
-    deck.insertCard(kittenCard, action.targetIndex);
-    
+    // Return to main phase and pass turn
     gameState.phase = 'MAIN_PHASE';
     
     gameState.gameLog.push({
@@ -426,6 +440,9 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
       action: 'KITTEN_PLACED',
       details: { index: action.targetIndex }
     });
+    
+    // Pass turn to next player
+    gameState = this.passTurn(gameState);
     
     return gameState;
   }
@@ -513,6 +530,35 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
   }
 
   /**
+   * Override to allow Defuse cards out of turn during DEFUSE_PENDING phase
+   */
+  canRespondOutOfTurn(
+    gameState: IGameState, 
+    playerId: string, 
+    actionType: ActionType
+  ): boolean {
+    // Allow Nope anytime (from parent)
+    if (actionType === 'NOPE') {
+      const player = gameState.players.find(p => p.id === playerId);
+      if (!player || player.status !== 'PLAYING' || player.isDisconnected) {
+        return false;
+      }
+      return true;
+    }
+    
+    // Allow Defuse during DEFUSE_PENDING phase
+    if (gameState.phase === 'DEFUSE_PENDING' && gameState.currentPlayerId === playerId) {
+      const player = gameState.players.find(p => p.id === playerId);
+      if (!player || player.status !== 'PLAYING' || player.isDisconnected) {
+        return false;
+      }
+      return true;
+    }
+    
+    return false;
+  }
+
+  /**
    * Reshuffle deck when empty
    */
   private reshuffleDeck(deck: Deck): void {
@@ -527,13 +573,42 @@ export class ExplodingKittensRuleSet extends BaseRuleSet {
    * Hides deck placement choices and other sensitive info
    */
   sanitizeStateForPlayer(gameState: IGameState, playerId: string): IGameState {
-    const sanitized = super.sanitizeStateForPlayer(gameState, playerId);
+    const sanitized = JSON.parse(JSON.stringify(gameState)) as IGameState;
     
-    // During defuse phase, don't reveal deck order to other players
-    if (gameState.phase === 'DEFUSE_PENDING' && gameState.currentPlayerId !== playerId) {
-      // Hide deck details
+    // Hide other players' hands
+    sanitized.players = sanitized.players.map((p: any) => {
+      if (p.id === playerId) {
+        return p; // Full info for current player
+      }
+      
+      // During defuse phase, still hide hands
+      return {
+        id: p.id,
+        name: p.name,
+        hand: Array(p.hand.length).fill({ type: 'hidden' }),
+        isBot: p.isBot,
+        status: p.status,
+        isDisconnected: p.isDisconnected
+      };
+    });
+    
+    // During defuse phase, only the defusing player sees the deck order
+    if (gameState.phase === 'DEFUSE_PENDING') {
+      if (gameState.currentPlayerId !== playerId) {
+        // Hide deck details from non-defusing players
+        (sanitized.deck as any).cards = Array((sanitized.deck as Deck).cards.length).fill({ type: 'hidden' });
+      }
+    } else {
+      // In normal phases, no one sees the deck order (only count)
       (sanitized.deck as any).cards = Array((sanitized.deck as Deck).cards.length).fill({ type: 'hidden' });
     }
+    
+    // Hide peeked cards of other players
+    sanitized.players.forEach((p: any) => {
+      if (p.id !== playerId) {
+        p.peekedCards = [];
+      }
+    });
     
     return sanitized;
   }
