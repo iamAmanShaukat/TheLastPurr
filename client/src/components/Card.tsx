@@ -14,12 +14,12 @@ export const Card: React.FC<CardProps> = ({
   onClick, 
   disabled = false, 
   isHidden = false,
-  size = 'medium'
+  size = 'large'
 }) => {
   const sizeClasses = {
-    small: 'w-16 h-24 text-xs',
-    medium: 'w-24 h-36 text-sm',
-    large: 'w-32 h-48 text-base',
+    small: 'w-20 h-28 text-xs',
+    medium: 'w-32 h-44 text-sm',
+    large: 'w-48 h-64 text-base',
   };
 
   const getCardColor = (type: string) => {
@@ -56,23 +56,34 @@ export const Card: React.FC<CardProps> = ({
         ${sizeClasses[size]} 
         bg-gradient-to-br ${getCardColor(card.type)}
         rounded-xl border-2 shadow-lg 
-        flex flex-col items-center justify-center p-2
+        flex flex-col items-center justify-center p-4
         ${!disabled ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'}
         transition-all duration-200
         select-none
       `}
     >
-      <div className="font-bold text-center leading-tight mb-1 text-white drop-shadow-lg">
-        {card.type}
+      {/* Card Header - Type Name */}
+      <div className="w-full bg-black/30 rounded-lg px-3 py-2 mb-3">
+        <div className="font-bold text-center leading-tight text-white drop-shadow-lg text-lg">
+          {card.type}
+        </div>
       </div>
+      
+      {/* Card Center - Image Placeholder Area */}
+      <div className="flex-1 w-full bg-white/10 rounded-lg flex items-center justify-center mb-3">
+        <div className="text-6xl">
+          {card.metadata.icon || '🃏'}
+        </div>
+      </div>
+      
+      {/* Card Bottom - Description */}
       {card.metadata.description && (
-        <div className="text-xs opacity-90 text-center text-white/90 hidden md:block drop-shadow">
-          {card.metadata.description}
+        <div className="w-full bg-black/30 rounded-lg px-3 py-2">
+          <div className="text-xs opacity-90 text-center text-white/90 drop-shadow leading-tight">
+            {card.metadata.description}
+          </div>
         </div>
       )}
-      <div className="mt-auto text-lg">
-        {card.metadata.icon || '🃏'}
-      </div>
     </motion.div>
   );
 };
