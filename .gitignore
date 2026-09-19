@@ -1,55 +1,52 @@
-```
-# Build artifacts
-dist/
-build/
-
-# Maps
-*.map
-
+```gitignore
 # Dependencies
 node_modules/
+
+# Build outputs
+dist/
+build/
+*.js.map
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # Logs
 *.log
 
-# Environment
-.env
-.env.local
-*.env.*
+# Temporary files
+*.tmp
+*.temp
 
-# Editors
-.vscode/
-.idea/
+# Coverage reports
+coverage/
+htmlcov/
+*.coverage
 
-# Python
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Compiled
+# Compiled files
 *.o
 *.obj
-*.exe
-*.dll
 *.so
+*.dll
+*.exe
 *.a
+*.lib
 
-# Temp files
-*.tmp
-*.swp
-*.swo
-
-# System
-.DS_Store
-Thumbs.db
-
-# Testing
-.coverage
-coverage/
-htmlcov/
-
-# Compressed
+# Compression files
 *.zip
 *.gz
 *.tar
@@ -72,4 +69,8 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+
+# System files
+.DS_Store
+Thumbs.db
 ```
