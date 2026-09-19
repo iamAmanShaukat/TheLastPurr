@@ -1,0 +1,33 @@
+{
+  "name": "the-last-purr",
+  "version": "1.0.0",
+  "description": "Modular multiplayer card game engine - The Last Purr",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "test": "jest"
+  },
+  "keywords": [
+    "card-game",
+    "multiplayer",
+    "socket.io",
+    "exploding-kittens",
+    "game-engine"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^22.15.32",
+    "socket.io": "^4.8.1",
+    "typescript": "^5.8.3",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "ts-node": "^10.9.2"
+  }
+}
