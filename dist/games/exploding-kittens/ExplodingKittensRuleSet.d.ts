@@ -2,7 +2,7 @@
  * Exploding Kittens RuleSet Implementation for "The Last Purr"
  * Implements all game-specific rules and mechanics
  */
-import { IGameState, IAction } from '../../core/interfaces';
+import { IGameState, IAction, ActionType } from '../../core/interfaces';
 import { BaseRuleSet } from '../../engine/BaseRuleSet';
 export declare const EK_CARD_TYPES: {
     readonly EXPLODING_KITTEN: 'exploding_kitten';
@@ -71,6 +71,10 @@ export declare class ExplodingKittensRuleSet extends BaseRuleSet {
      * Override validation for Exploding Kittens specific rules
      */
     validateAction(gameState: IGameState, action: IAction): boolean;
+    /**
+     * Override to allow Defuse cards out of turn during DEFUSE_PENDING phase
+     */
+    canRespondOutOfTurn(gameState: IGameState, playerId: string, actionType: ActionType): boolean;
     /**
      * Reshuffle deck when empty
      */

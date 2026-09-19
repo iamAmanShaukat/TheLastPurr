@@ -45,6 +45,7 @@ export interface IGameState {
     winnerId: string | null;
     createdAt: number;
     lastUpdatedAt: number;
+    metadata?: Record<string, any>;
 }
 export interface IGameLogEntry {
     timestamp: number;
